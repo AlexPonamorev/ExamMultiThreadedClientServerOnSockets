@@ -50,13 +50,14 @@ public class Reader
 
     @Override
     public boolean closeConnect(SimpleMessage message) {
-        if (message.getText().equalsIgnoreCase(Close.SHUTDOWN)) {
+        if (message.getText().equalsIgnoreCase(Close.SHUTDOWN)){
+            Thread.currentThread().interrupt();
             try {
-                Thread.currentThread().interrupt(); // выставить флаг
-                return true;
+                clientSocket.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            return true;
         }
         return false;
     }
