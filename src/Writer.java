@@ -19,9 +19,7 @@ public class Writer
     }
 
     /**
-     * инструкции для потока отправляют сообщение из очереди
-     * каждого потока
-     * всем клиентам кроме отправившего
+     * Инструкции для рассылки сообщений всем клиентам кроме отправившего сообщение
      * */
     @Override
     public void run() {
@@ -32,9 +30,10 @@ public class Writer
 
                 // Проверяем на слово Exit и на
                 // факт одинаковых соединений, чтобы не отправлять сообщение
-                // клиенту отправившего его
+                // самому себе
                 if (closeConnect(message))
-                {  // удалить сообщение и id соединения из коллекция
+                {  // удалить сообщение из очереди сообщений и
+                   // удалить по номеру порта(ключу) соединение(сокет клиента)
                     queueOfMessages.remove(message);
                     connections.remove(clientSocket.getPort());
                     System.out.println("----------------------------------------------------------"+
@@ -42,6 +41,7 @@ public class Writer
                             "\n" + "Total connections: " + connections.size() +
                             "\n");
                 }else {
+                        // проитерироваться по всем ключам и отправить всем клиентам кроме оправившего
                     for (Socket fromMap : connections.values()) {
                         if (! ( (clientSocket.getPort())==(fromMap.getPort())) ){
                             ObjectOutputStream out = new ObjectOutputStream(fromMap.getOutputStream()) ;
