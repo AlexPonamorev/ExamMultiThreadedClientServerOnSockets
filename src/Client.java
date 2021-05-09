@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class Client {
     private String name;
-    private BufferedReader reader;
+    private BufferedReader reader; 
     private Properties connectionProperties;
     private Socket socket;
 
@@ -13,7 +13,7 @@ public class Client {
         Objects.requireNonNull(connectionProperties, "connectionProperties is not be null");
         this.connectionProperties = connectionProperties;
         setName(name);
-        reader = new BufferedReader(new InputStreamReader(System.in));
+        reader = new BufferedReader(new InputStreamReader(System.in)); 
     }
 
     private void setName(String name) {
@@ -27,7 +27,7 @@ public class Client {
      * Подключаемся к серверу
      *
      * счититываем адрес
-     * создаем сокет клиента
+     * создаем сокет клиента на локальном порту и коннектимся на ip и порт сервера считываемых из файла Connection.properties
      */
     private void connectToServer() {
         try(FileInputStream fileInputStream = new FileInputStream("/home/alex/IdeaProjects/Server/Resources/Connection.properties")){
@@ -41,10 +41,11 @@ public class Client {
     }
 
     /**
-     * Внутри создается поток который читает с командной строки
-     * и отправляет эти данные на сервер, поток зациклен
-     * поэтому снова можно вводить данные при каждой отправке.
-     * Выходим из потока и рвем соединение если введено слово /exit
+     * Создается объект потока который читает с командной строки
+     * и отправляет эти данные на сервер.
+     * Поток зациклен поэтому снова можно вводить данные при каждой отправке.
+     * 
+     * Выходим из потока и разрываем соединение если введено слово /exit
      */
     private void readMessageFromCommandLineAndSend() {
         new Thread(() -> {
@@ -55,10 +56,6 @@ public class Client {
                     SimpleMessage message = new SimpleMessage(reader.readLine(), name);
                     ObjectOutputStream out =  new ObjectOutputStream(socket.getOutputStream());
 
-                    /**
-                     * objectOutputStream objectOutput = new ObjectOutputStream(fileStream)){
-                     используя поток записи записывает object в файл в виде .bin
-                     objectOutput.writeObject(object); // запись из потока fileStream*/
                     // сериализация
                     out.writeObject(message);
                     // отправка
@@ -80,7 +77,7 @@ public class Client {
     }
 
     /**
-     * Внутри создается поток который читает данные с сервера
+     * Создается объект потока который принимает данные с сервера
      * и выводит их в консоль
      */
     void readAndPrintMessageFromServer() {
@@ -88,6 +85,7 @@ public class Client {
             // пока флаг isInterrupted - true
             while (!Thread.currentThread().isInterrupted()) {
                 try {
+                    
                     ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
                     // десериализация
                     SimpleMessage simpleMessage = (SimpleMessage) objectInputStream.readObject();
