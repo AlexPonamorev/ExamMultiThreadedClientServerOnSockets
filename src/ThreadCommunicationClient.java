@@ -4,17 +4,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * инструкции обработки для нити общения с клиентом
- * **************************************
- * принимает сокет для общения с данным клиентом
- * имеет два потока для отправки и принятия сообщений
- *
- * общение происходит через сокет
- * сокет - абстракция туннеля в котором два канала
- * канал в котором есть поток чтения InputStream
- * канал в котором есть поток записи OutputStream
- *
- * */
+ * Обьект данной нити создается под каждого подключившегося клиента
+ * в свою очередь создаёт две нити для приема и отправки сообщений
+*/
 
 public class ThreadCommunicationClient implements Runnable {
 
@@ -31,9 +23,7 @@ public class ThreadCommunicationClient implements Runnable {
 
 
     }
- /**
-  *  инструкции нитей записи и чтения  для работы с клиентом
-  * */
+ 
     @Override
     public void run() {
 
