@@ -41,8 +41,9 @@ public class Server {
                 printAboutConnection(clientSocket);
                 queueMessages = new SynchronousQueue<>();
                 // после получения запроса на подключение сервер создаёт сокет
-                // для общения с клиентом и отправляет его в отдельную нить
-                // куда передаем сокет для общения с данным клиентом
+                // для общения с данным клиентом
+                // для каждого клиента создается поток его обслуживающий который в свою очередь имеет два потока: чтения и записи
+                // передаем поток обслуживающий клиента в управление ExecutorService 
 
                 executeIt.execute(new ThreadCommunicationClient(clientSocket,queueMessages,connections));
                 System.out.println("Connection accepted...");
