@@ -1,8 +1,12 @@
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
 /**
+ * Обьект данной нити создается под каждого подключившегося клиента
+ * в свою очередь создаёт две нити для приема и отправки сообщений
+ * <p>
  * инструкции обработки для нити общения с клиентом
  * **************************************
  * принимает сокет для общения с данным клиентом
@@ -15,30 +19,32 @@ import java.util.concurrent.SynchronousQueue;
  */
 
 public class ThreadCommunicationClient implements Runnable {
-    private final Socket clientSocket;
-    private final ConcurrentHashMap<Integer, Socket> clientSocketByClientPor;
-    private final SynchronousQueue<SimpleMessage> queueOfMessages;
+
+    private Socket clientSocket;
+
+    private ConcurrentHashMap<Integer, Socket> connections;
+    private SynchronousQueue<SimpleMessage> queueOfMessages;
 
     public ThreadCommunicationClient(Socket clientSocket, SynchronousQueue<SimpleMessage> queueOfMessages,
-                                     ConcurrentHashMap<Integer, Socket> clientSocketByClientPor) {
+                                     ConcurrentHashMap<Integer, Socket> connections) {
         this.clientSocket = clientSocket;
         this.queueOfMessages = queueOfMessages;
-        this.clientSocketByClientPor = clientSocketByClientPor;
+        this.connections = connections;
 
 
     }
 
     /**
-     * инструкции нитей записи и чтения для работы с клиентом
+     * инструкции нитей записи и чтения  для работы с клиентом
      */
     @Override
     public void run() {
 
         new Thread(new Writer(clientSocket,
-                queueOfMessages, clientSocketByClientPor)).start();
+                queueOfMessages, connections)).start();
 
         new Thread(new Reader(clientSocket,
                 queueOfMessages,
-                clientSocketByClientPor)).start();
+                connections)).start();
     }
 }
