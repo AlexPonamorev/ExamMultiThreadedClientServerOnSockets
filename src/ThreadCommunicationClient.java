@@ -1,4 +1,3 @@
-import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
@@ -8,40 +7,38 @@ import java.util.concurrent.SynchronousQueue;
  * **************************************
  * принимает сокет для общения с данным клиентом
  * имеет два потока для отправки и принятия сообщений
- *
+ * <p>
  * общение происходит через сокет
  * сокет - абстракция туннеля в котором два канала
  * канал в котором есть поток чтения InputStream
  * канал в котором есть поток записи OutputStream
- *
- * */
+ */
 
 public class ThreadCommunicationClient implements Runnable {
-
-    private Socket clientSocket;
-
-    private ConcurrentHashMap<Integer, Socket> connections;
-    private SynchronousQueue<SimpleMessage> queueOfMessages;
+    private final Socket clientSocket;
+    private final ConcurrentHashMap<Integer, Socket> clientSocketByClientPor;
+    private final SynchronousQueue<SimpleMessage> queueOfMessages;
 
     public ThreadCommunicationClient(Socket clientSocket, SynchronousQueue<SimpleMessage> queueOfMessages,
-                                     ConcurrentHashMap<Integer, Socket> connections) {
+                                     ConcurrentHashMap<Integer, Socket> clientSocketByClientPor) {
         this.clientSocket = clientSocket;
         this.queueOfMessages = queueOfMessages;
-        this.connections = connections;
+        this.clientSocketByClientPor = clientSocketByClientPor;
 
 
     }
- /**
-  *  инструкции нитей записи и чтения  для работы с клиентом
-  * */
+
+    /**
+     * инструкции нитей записи и чтения для работы с клиентом
+     */
     @Override
     public void run() {
 
         new Thread(new Writer(clientSocket,
-                queueOfMessages, connections)).start();
+                queueOfMessages, clientSocketByClientPor)).start();
 
         new Thread(new Reader(clientSocket,
                 queueOfMessages,
-                connections)).start();
+                clientSocketByClientPor)).start();
     }
 }

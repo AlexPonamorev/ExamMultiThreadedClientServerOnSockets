@@ -7,21 +7,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 
 public class Server {
-    static ExecutorService executeIt = Executors.newFixedThreadPool(7);
+    static ExecutorService executorService = Executors.newFixedThreadPool(7);
     private int countConnections;
-    private ConcurrentHashMap<Integer, Socket> connections;
+    private final ConcurrentHashMap<Integer, Socket> clientSocketByClientPort;
     private SynchronousQueue<SimpleMessage> queueMessages;
     private Socket serverSocket;
 
     public Server() {
-        connections = new ConcurrentHashMap<>();
+        clientSocketByClientPort = new ConcurrentHashMap<>();
 
     }
 
     private void printAboutConnection(Socket socket) {
         System.out.println("----------------------------------------------------------" +
-                "\n" + "There was a connection: " + socket.toString() +
-                "\n" + "Total connections: " + connections.size() +
+                "\n" + "Произошло подключение, создан сокет для общения с клиентом : " + socket.toString() +
+                "\n" + "Количество соединений на данный момент : " + clientSocketByClientPort.size() +
                 "\n");
     }
 
@@ -36,20 +36,22 @@ public class Server {
                 // слушаем серверный сокет на предмет запроса на подключение - цикл ждет здесь
                 // при подключении создается сокет для общения с клиентом
                 Socket clientSocket = serverSocket.accept();
-                connections.put(clientSocket.getPort(), clientSocket);
+                clientSocketByClientPort.put(clientSocket.getPort(), clientSocket);
 
                 printAboutConnection(clientSocket);
                 queueMessages = new SynchronousQueue<>();
-                // после получения запроса на подключение сервер создаёт сокет
-                // для общения с клиентом и отправляет его в отдельную нить
-                // куда передаем сокет для общения с данным клиентом
+                // после получения запроса на подключение сервер создаёт сокет для общения с данным клиентом
 
-                executeIt.execute(new ThreadCommunicationClient(clientSocket,queueMessages,connections));
+                // далее для этого клиента создается нить(new ThreadCommunicationClient) с двумя нитями внутри - чтения и записи
+                // в данную нить передаем сокет подключившегося клиента
+
+                // нить выделяется пулом потоков
+                executorService.execute(new ThreadCommunicationClient(clientSocket, queueMessages, clientSocketByClientPort));
                 System.out.println("Connection accepted...");
 
             }
             // закрыть пул нитей после завершения работы всех нитей
-            executeIt.shutdown();
+            executorService.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         }

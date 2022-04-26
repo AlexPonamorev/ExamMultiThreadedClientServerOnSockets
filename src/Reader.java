@@ -4,25 +4,27 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
-public class Reader
-        implements Runnable, Close {
+/**
+ * класс реализующий поток чтения из сокета для каждого клиента
+ */
+public class Reader implements Runnable, Close {
 
-    private Socket clientSocket;
-    private SynchronousQueue<SimpleMessage> queue;
-    private ConcurrentHashMap<Integer, Socket> connections;
+    private final Socket clientSocket;
+    private final SynchronousQueue<SimpleMessage> queue;
+    private final ConcurrentHashMap<Integer, Socket> clientSocketByClientPor;
 
 
-    public Reader(Socket socket, SynchronousQueue<SimpleMessage> queue, ConcurrentHashMap<Integer, Socket> connections) {
+    public Reader(Socket socket, SynchronousQueue<SimpleMessage> queue, ConcurrentHashMap<Integer, Socket> clientSocketByClientPor) {
         this.clientSocket = socket;
         this.queue = queue;
-        this.connections = connections;
+        this.clientSocketByClientPor = clientSocketByClientPor;
     }
 
     /**
-     * нить читает из соедиения
-     * кладет солбщение в очередь
+     * нить читает из соединения,
+     * кладет сообщение в очередь
      * проверяет флаг завершения
-     * */
+     */
     @Override
     public void run() {
         // проверка флага isInrerrupred о необходимости завершения потока
@@ -40,9 +42,7 @@ public class Reader
                 // проверяем сообщение на выход
                 closeConnect(simpleMessage);
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (InterruptedException | IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -50,7 +50,7 @@ public class Reader
 
     @Override
     public boolean closeConnect(SimpleMessage message) {
-        if (message.getText().equalsIgnoreCase(Close.SHUTDOWN)){
+        if (message.getText().equalsIgnoreCase(Close.SHUTDOWN)) {
             Thread.currentThread().interrupt();
             try {
                 clientSocket.close();

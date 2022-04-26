@@ -30,7 +30,7 @@ public class Client {
      * создаем сокет клиента
      */
     private void connectToServer() {
-        try(FileInputStream fileInputStream = new FileInputStream("/home/alex/IdeaProjects/Server/Resources/Connection.properties")){
+        try(FileInputStream fileInputStream = new FileInputStream("/home/alex/Document/IdeaProjects27May/IdeaProjects/Server_OfMine/resources/connection.properties")){
             connectionProperties.load(fileInputStream);
             this.socket = new Socket(
                     connectionProperties.getProperty("ip"),
@@ -41,7 +41,7 @@ public class Client {
     }
 
     /**
-     * Внутри создается поток который читает с командной строки
+     * Внутри создается поток который, читает с командной строки
      * и отправляет эти данные на сервер, поток зациклен
      * поэтому снова можно вводить данные при каждой отправке.
      * Выходим из потока и рвем соединение если введено слово /exit

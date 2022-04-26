@@ -1,6 +1,5 @@
 public interface Close {
-    final static String SHUTDOWN = "/exit";
+    String SHUTDOWN = "/exit";
 
-
-    public boolean closeConnect(SimpleMessage message);
+    boolean closeConnect(SimpleMessage message);
 }
